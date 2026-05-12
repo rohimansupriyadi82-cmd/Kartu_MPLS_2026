@@ -76,6 +76,59 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        const dataUrlBytes = (dataUrl) => {
+            if (!dataUrl) return 0;
+            const commaIndex = dataUrl.indexOf(',');
+            if (commaIndex === -1) return 0;
+            const b64 = dataUrl.slice(commaIndex + 1);
+            const padding = (b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0);
+            return Math.ceil((b64.length * 3) / 4) - padding;
+        };
+
+        const compressImageDataUrl = async (dataUrl, { maxBytes = 180_000, maxWidth = 720, maxHeight = 720 } = {}) => {
+            if (!dataUrl) return "";
+
+            const img = await new Promise((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = () => reject(new Error("Gagal memuat gambar"));
+                i.src = dataUrl;
+            });
+
+            const baseScale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+            if (baseScale >= 1 && dataUrlBytes(dataUrl) <= maxBytes) return dataUrl;
+            let scale = baseScale;
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d", { alpha: false });
+            if (!ctx) return dataUrl;
+
+            const render = (q) => {
+                const w = Math.max(1, Math.round(img.width * scale));
+                const h = Math.max(1, Math.round(img.height * scale));
+                canvas.width = w;
+                canvas.height = h;
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0, w, h);
+                return canvas.toDataURL("image/jpeg", q);
+            };
+
+            let out = dataUrl;
+            for (let attempt = 0; attempt < 10; attempt++) {
+                let quality = 0.86;
+                for (let qTry = 0; qTry < 8; qTry++) {
+                    out = render(quality);
+                    if (dataUrlBytes(out) <= maxBytes) return out;
+                    quality -= 0.08;
+                    if (quality < 0.35) break;
+                }
+                scale *= 0.85;
+                if (scale < 0.25) break;
+            }
+            return out;
+        };
+
         // 1. PENGATURAN TEMA
         const THEMES = {
             original: { sky: 'from-[#38bdf8] to-[#bae6fd]', grass: 'bg-[#4ade80]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#3b82f6]', subBg: 'bg-[#3b82f6]', nameText: 'text-[#1e3a8a]' },
@@ -246,6 +299,7 @@
             
             const [tempFoto, setTempFoto] = useState("");
             const [zipPhotos, setZipPhotos] = useState({});
+            const quotaWarnedRef = useRef(false);
 
             const inNamaRef = useRef();
             const inTtlRef = useRef();
@@ -253,10 +307,17 @@
 
             // Auto Save
             useEffect(() => {
-                localStorage.setItem('mpls_students', JSON.stringify(students));
-                localStorage.setItem('mpls_logo', schLogo);
-                localStorage.setItem('mpls_schName', schName);
-                localStorage.setItem('mpls_theme', themeKey);
+                try {
+                    localStorage.setItem('mpls_students', JSON.stringify(students));
+                    localStorage.setItem('mpls_logo', schLogo);
+                    localStorage.setItem('mpls_schName', schName);
+                    localStorage.setItem('mpls_theme', themeKey);
+                } catch (e) {
+                    if (!quotaWarnedRef.current) {
+                        quotaWarnedRef.current = true;
+                        alert("Penyimpanan browser penuh. Foto akan dikompresi, atau kurangi jumlah data/foto agar tidak blank putih.");
+                    }
+                }
             }, [students, schLogo, schName, themeKey]);
 
             const upLogo = (e) => {
@@ -271,8 +332,17 @@
             const upFotoDraft = (e) => {
                 const file = e.target.files[0];
                 if (file) {
+                    setTempFoto("");
                     const r = new FileReader();
-                    r.onload = (evt) => setTempFoto(evt.target.result);
+                    r.onload = async (evt) => {
+                        const raw = evt.target.result;
+                        try {
+                            const compressed = await compressImageDataUrl(raw, { maxBytes: 150_000, maxWidth: 300, maxHeight: 300 });
+                            setTempFoto(compressed);
+                        } catch (err) {
+                            setTempFoto(raw);
+                        }
+                    };
                     r.readAsDataURL(file);
                 }
             };
@@ -282,11 +352,12 @@
                 const ttl = inTtlRef.current.value.toUpperCase().trim();
                 if (!nama) return alert("Harap isi nama siswa!");
                 
-                setStudents([...students, { nama, ttl, foto: tempFoto }]);
+                const foto = tempFoto;
+                setTempFoto("");
+                setStudents(prevStudents => [...prevStudents, { nama, ttl, foto }]);
                 inNamaRef.current.value = "";
                 inTtlRef.current.value = "";
                 inFotoRef.current.value = "";
-                setTempFoto("");
             };
 
             const importZip = async (e) => {
@@ -301,7 +372,11 @@
                             const r = new FileReader(); r.onloadend = () => res(r.result); r.readAsDataURL(blob);
                         });
                         const key = name.split('/').pop().split('.').shift().toUpperCase().trim();
-                        newPhotos[key] = b64;
+                        try {
+                            newPhotos[key] = await compressImageDataUrl(b64, { maxBytes: 150_000, maxWidth: 300, maxHeight: 300 });
+                        } catch (err) {
+                            newPhotos[key] = b64;
+                        }
                     }
                 }
                 setZipPhotos(newPhotos);
@@ -383,7 +458,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
