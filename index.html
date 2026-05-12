@@ -18,12 +18,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
         .font-nunito { font-family: 'Nunito', sans-serif; }
         
-        .sidebar-scroll::-webkit-scrollbar { width: 5px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: #0f172a; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
 
         @keyframes float-kids {
             0%, 100% { transform: translate(0, 0px); }
@@ -40,18 +40,32 @@
                 animation: none !important;
             }
             .no-print { display: none !important; }
+            html, body { overflow: visible !important; height: auto !important; }
             body { background: white; margin: 0; padding: 0; }
+            .h-screen { height: auto !important; }
+            .app-shell { height: auto !important; overflow: visible !important; }
+            main { overflow: visible !important; padding: 0 !important; }
+            #printArea { display: block !important; }
+
+            .kartu-b3 { width: 95mm !important; height: 124mm !important; position: relative !important; overflow: hidden !important; }
+            .page-break { break-after: page; page-break-after: always; }
             
-            .hal-f4 {
+            .lembar-f4 {
                 width: 330mm; height: 215mm;
                 display: flex; flex-direction: row;
                 justify-content: center; align-items: center;
-                gap: 12mm;
+                gap: 2mm;
+                transform: none !important;
+                break-after: page;
                 page-break-after: always;
+                break-inside: avoid;
                 page-break-inside: avoid;
+                clear: both;
                 background: white !important;
                 margin: 0; padding: 0;
             }
+            .hal-f4 { gap: 2mm !important; }
+            .lembar-f4:last-child, .hal-f4:last-child { break-after: auto; page-break-after: auto; }
             .kartu-print-border { border: 1px dashed #64748b !important; }
         }
     </style>
@@ -122,7 +136,10 @@
 
             return (
                 <div className="relative group shrink-0">
-                    <div id={cardId} className={`w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
+                    <div id={cardId} className={`kartu-b3 w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
+                        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+                            <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.15]" crossOrigin="anonymous" alt="Anak SD" />
+                        </div>
                         
                         {/* ALAT TULIS TRANSPARAN */}
                         <div className="absolute inset-0 z-[1] opacity-[0.25] pointer-events-none text-2xl">
@@ -192,14 +209,9 @@
                         {/* AREA BAWAH: GEDUNG, ANAK SD, TAMAN */}
                         <div className="absolute bottom-0 left-0 w-full h-[160px] z-[5] pointer-events-none flex flex-col justify-end">
                             <SchoolBuilding />
-                            
-                            {/* GAMBAR ANAK SD - DI POJOK KIRI BAWAH SESUAI REQUEST */}
-                            <img src="./Anak_SD.png"
-                                 className="absolute bottom-[22px] left-[10px] w-[50%] object-contain drop-shadow-lg z-20 anim-kids" 
-                                 crossOrigin="anonymous" alt="Anak SD" />
 
                             <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
-                                <div className={`absolute -top-[18px] left-[-15%] w-[130%] h-[35px] ${theme.grass} rounded-[50%] border-t-[5px] ${theme.grassLine}`}></div>
+                                <div className={`absolute -top-[18px] left-0 w-full h-[35px] ${theme.grass} rounded-[50%] border-t-[5px] ${theme.grassLine}`}></div>
                                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-[45px] bg-[#d97706] opacity-[0.35]" style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)' }}></div>
                             </div>
                         </div>
@@ -232,7 +244,7 @@
             const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN MUARA BAKTI 01");
             const [themeKey, setThemeKey] = useState(() => localStorage.getItem('mpls_theme') || "original");
             
-            const [draftPhoto, setDraftPhoto] = useState("");
+            const [tempFoto, setTempFoto] = useState("");
             const [zipPhotos, setZipPhotos] = useState({});
 
             const inNamaRef = useRef();
@@ -260,7 +272,7 @@
                 const file = e.target.files[0];
                 if (file) {
                     const r = new FileReader();
-                    r.onload = (evt) => setDraftPhoto(evt.target.result);
+                    r.onload = (evt) => setTempFoto(evt.target.result);
                     r.readAsDataURL(file);
                 }
             };
@@ -270,11 +282,11 @@
                 const ttl = inTtlRef.current.value.toUpperCase().trim();
                 if (!nama) return alert("Harap isi nama siswa!");
                 
-                setStudents([...students, { nama, ttl, foto: draftPhoto }]);
+                setStudents([...students, { nama, ttl, foto: tempFoto }]);
                 inNamaRef.current.value = "";
                 inTtlRef.current.value = "";
                 inFotoRef.current.value = "";
-                setDraftPhoto("");
+                setTempFoto("");
             };
 
             const importZip = async (e) => {
@@ -320,14 +332,14 @@
                 }
             };
 
-            // Setup halaman cetak per 3 baris
-            const chunkedStudents = [];
+            // Setup halaman cetak per 3 kartu
+            const pagedData = [];
             for (let i = 0; i < students.length; i += 3) {
-                chunkedStudents.push({ items: students.slice(i, i + 3), startIndex: i });
+                pagedData.push({ items: students.slice(i, i + 3), startIndex: i });
             }
 
             return (
-                <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+                <div className="app-shell flex flex-col md:flex-row h-screen overflow-hidden">
                     {/* SIDEBAR */}
                     <aside className="no-print w-full md:w-85 lg:w-96 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50">
                         <div className="p-6 border-b border-slate-800">
@@ -340,7 +352,7 @@
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto sidebar-scroll p-6 space-y-6">
+                        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
                             <section>
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">⚙️ Pilih Tema</label>
                                 <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none cursor-pointer">
@@ -371,7 +383,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
@@ -382,7 +394,7 @@
                                         ➕ TAMBAHKAN
                                     </button>
                                 </div>
-                                {draftPhoto && <p className="text-[9px] text-emerald-400 text-center font-bold">✓ Foto terpilih siap ditambahkan</p>}
+                                {tempFoto && <p className="text-[9px] text-emerald-400 text-center font-bold">✓ Foto terpilih siap ditambahkan</p>}
                             </section>
 
                             <section>
@@ -410,7 +422,7 @@
                     </aside>
 
                     {/* PREVIEW AREA */}
-                    <main className="flex-1 p-4 md:p-10 overflow-y-auto bg-slate-200 w-full relative">
+                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative">
                         <div className="no-print max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
                             <div>
                                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Realtime Preview F4</h2>
@@ -428,12 +440,12 @@
                                     Belum ada data siswa yang diinput.
                                 </div>
                             ) : (
-                                chunkedStudents.map((chunk, pageIndex) => (
-                                    <div key={pageIndex} className="hal-f4 bg-white md:shadow-xl md:border md:border-slate-300 md:mb-10 md:p-[10mm] flex flex-row justify-center items-center gap-[12mm] scale-[0.6] sm:scale-[0.8] md:scale-100 origin-top">
-                                        {chunk.items.map((student, idx) => (
+                                pagedData.map((page, pageIndex) => (
+                                    <div key={pageIndex} className="page-break lembar-f4 hal-f4 bg-white md:shadow-xl md:border md:border-slate-300 md:mb-10 md:p-[10mm] flex flex-row justify-center items-center gap-[12mm] scale-[0.6] sm:scale-[0.8] md:scale-100 origin-top">
+                                        {page.items.map((student, idx) => (
                                             <Card 
-                                                key={chunk.startIndex + idx} 
-                                                index={chunk.startIndex + idx} 
+                                                key={page.startIndex + idx} 
+                                                index={page.startIndex + idx} 
                                                 student={student} 
                                                 themeKey={themeKey} 
                                                 schName={schName} 
