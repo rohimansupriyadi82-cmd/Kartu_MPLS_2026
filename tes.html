@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPLS 2026 PRO - React & Tailwind Edition</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; }
+        .font-nunito { font-family: 'Nunito', sans-serif; }
+        
+        .sidebar-scroll::-webkit-scrollbar { width: 5px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        @keyframes float-kids {
+            0%, 100% { transform: translate(-50%, 0px); }
+            50% { transform: translate(-50%, -4px); }
+        }
+        .anim-kids { animation: float-kids 3s ease-in-out infinite; }
+
+        /* Optimasi Cetak F4 Landscape */
+        @media print {
+            @page { size: 330mm 215mm landscape; margin: 0; }
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                animation: none !important;
+            }
+            .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            
+            .hal-f4 {
+                width: 330mm; height: 215mm;
+                display: flex; flex-direction: row;
+                justify-content: center; align-items: center;
+                gap: 12mm;
+                page-break-after: always;
+                page-break-inside: avoid;
+                background: white !important;
+                margin: 0; padding: 0;
+            }
+            .kartu-print-border { border: 1px dashed #64748b !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // 1. PENGATURAN TEMA
+        const THEMES = {
+            original: { sky: 'from-[#38bdf8] to-[#bae6fd]', grass: 'bg-[#4ade80]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#3b82f6]', subBg: 'bg-[#3b82f6]', nameText: 'text-[#1e3a8a]' },
+            modern:   { sky: 'from-[#3b82f6] to-[#93c5fd]', grass: 'bg-[#2dd4bf]', grassLine: 'border-[#0d9488]', nameBorder: 'border-[#0f766e]', subBg: 'bg-[#0f766e]', nameText: 'text-[#134e4a]' },
+            energetic:{ sky: 'from-[#f97316] to-[#fde047]', grass: 'bg-[#fb923c]', grassLine: 'border-[#ea580c]', nameBorder: 'border-[#c2410c]', subBg: 'bg-[#ea580c]', nameText: 'text-[#7c2d12]' },
+            forest:   { sky: 'from-[#10b981] to-[#a7f3d0]', grass: 'bg-[#84cc16]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#4d7c0f]', subBg: 'bg-[#4d7c0f]', nameText: 'text-[#14532d]' }
+        };
+
+        // 2. KOMPONEN SVG GEDUNG SEKOLAH (Flat Illustration)
+        const SchoolBuilding = () => (
+            <svg viewBox="0 0 200 120" className="absolute bottom-[35px] left-1/2 -translate-x-1/2 w-[85%] z-[5] drop-shadow-md">
+                <rect x="20" y="40" width="160" height="80" fill="#fef3c7" rx="4" />
+                <rect x="20" y="75" width="160" height="5" fill="#f97316" />
+                <rect x="10" y="30" width="180" height="15" fill="#f97316" rx="2" />
+                
+                <rect x="80" y="40" width="40" height="80" fill="#ffedd5" />
+                <rect x="75" y="20" width="50" height="25" fill="#ea580c" />
+                <polygon points="100,5 70,20 130,20" fill="#c2410c" />
+                
+                <rect x="35" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="60" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="125" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="150" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
+                
+                <rect x="35" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="60" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="125" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
+                <rect x="150" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
+                
+                <rect x="85" y="90" width="30" height="30" fill="#94a3b8" />
+                <rect x="98" y="90" width="4" height="30" fill="#cbd5e1" />
+            </svg>
+        );
+
+        // 3. KOMPONEN KARTU MPLS
+        const Card = ({ student, index, themeKey, schName, logo, onRemove }) => {
+            const theme = THEMES[themeKey];
+            const cardId = `card-${index}`;
+
+            const handleDownloadPNG = async () => {
+                const el = document.getElementById(cardId);
+                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
+                const link = document.createElement('a');
+                link.download = `MPLS_${student.nama}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+
+            const handleDownloadPDF = async () => {
+                const el = document.getElementById(cardId);
+                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', [85, 120]);
+                pdf.addImage(imgData, 'PNG', 0, 0, 85, 120);
+                pdf.save(`MPLS_${student.nama}.pdf`);
+            };
+
+            return (
+                <div className="relative group shrink-0">
+                    <div id={cardId} className={`w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
+                        
+                        {/* ALAT TULIS TRANSPARAN */}
+                        <div className="absolute inset-0 z-[1] opacity-[0.25] pointer-events-none text-2xl">
+                            <span className="absolute top-10 left-5 -rotate-45">✏️</span>
+                            <span className="absolute top-24 left-2 rotate-12">📏</span>
+                            <span className="absolute top-8 right-6 rotate-45">🔍</span>
+                            <span className="absolute top-28 right-4 -rotate-12">📖</span>
+                            <span className="absolute top-16 left-[35%] rotate-90">✂️</span>
+                            <span className="absolute top-[80px] right-[30%] -rotate-45">🍃</span>
+                        </div>
+
+                        {/* AWAN */}
+                        <div className="absolute z-[2] top-4 -left-6 w-24 h-12 bg-white rounded-full opacity-90 blur-[1px]"></div>
+                        <div className="absolute z-[2] top-10 -right-8 w-32 h-16 bg-white rounded-full opacity-80 blur-[1px]"></div>
+                        <div className="absolute z-[2] top-32 left-8 w-20 h-10 bg-white rounded-full opacity-70 blur-[1px]"></div>
+
+                        {/* LOGO SEKOLAH - Diperbaiki agar tidak menutupi teks */}
+                        <div className="absolute top-3 left-3 z-20">
+                            <img src={logo} className="w-11 h-11 rounded-full border-[2.5px] border-white bg-white shadow-md object-contain" crossOrigin="anonymous" />
+                        </div>
+
+                        {/* TEKS MELENGKUNG: SELAMAT DATANG - Path diatur simetris untuk menghindari logo */}
+                        <div className="relative z-10 w-full h-[60px] mt-2">
+                            <svg viewBox="0 0 300 60" className="w-full h-full drop-shadow-md">
+                                <path id={`curve-${index}`} d="M 55 50 Q 150 10 245 50" fill="transparent" />
+                                <text className="font-black text-[18px] tracking-widest uppercase" style={{ fill: '#f97316', stroke: 'white', strokeWidth: '4px', paintOrder: 'stroke' }}>
+                                    <textPath href={`#curve-${index}`} startOffset="50%" textAnchor="middle">SELAMAT DATANG</textPath>
+                                </text>
+                            </svg>
+                        </div>
+
+                        {/* JUDUL UTAMA MPLS & SUBTITLE */}
+                        <div className="relative z-10 flex flex-col items-center mt-[-10px] w-full px-4">
+                            <h1 className="text-[75px] leading-none font-black text-[#ec4899] drop-shadow-lg tracking-wide" style={{ WebkitTextStroke: '4px white', paintOrder: 'stroke' }}>
+                                MPLS
+                            </h1>
+                            <div className={`${theme.subBg} border-2 border-white px-4 py-1 rounded-full shadow-md mt-1`}>
+                                <p className="text-white text-[10px] font-extrabold uppercase tracking-widest">
+                                    Masa Pengenalan Lingkungan Sekolah
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* BINGKAI FOTO */}
+                        <div className="relative z-20 mt-4 w-[90px] h-[120px] rounded-2xl border-[4px] border-white shadow-xl overflow-hidden bg-white/70 flex justify-center items-center">
+                            {student.foto ? (
+                                <img src={student.foto} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                            ) : (
+                                <span className="text-xs font-bold text-slate-400 text-center leading-tight">FOTO<br/>3x4</span>
+                            )}
+                        </div>
+
+                        {/* NAMA SISWA */}
+                        <div className="relative z-30 mt-3 w-[85%]">
+                            <div className={`bg-white rounded-[14px] shadow-lg border-b-[5px] ${theme.nameBorder} px-2 py-2.5 flex flex-col items-center justify-center min-h-[50px]`}>
+                                <h2 className={`${theme.nameText} font-black text-[17px] leading-tight uppercase text-center w-full truncate tracking-wide`}>
+                                    {student.nama}
+                                </h2>
+                            </div>
+                            {student.ttl && (
+                                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#f59e0b] text-white text-[9px] px-4 py-0.5 rounded-full border-[1.5px] border-white font-black tracking-widest shadow-md whitespace-nowrap">
+                                    {student.ttl}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* AREA BAWAH: GEDUNG, ANAK SD, TAMAN */}
+                        <div className="absolute bottom-0 left-0 w-full h-[160px] z-[5] pointer-events-none flex flex-col justify-end">
+                            <SchoolBuilding />
+                            
+                            <img src="https://png.pngtree.com/png-vector/20230817/ourmid/pngtree-indonesian-elementary-school-kids-boy-and-girl-with-red-white-uniform-vector-png-image_9185121.png"
+                                 className="absolute bottom-[20px] left-1/2 w-[70%] object-contain drop-shadow-md z-20 anim-kids" 
+                                 crossOrigin="anonymous" alt="Anak SD" />
+
+                            <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
+                                <div className={`absolute -top-[18px] left-[-15%] w-[130%] h-[35px] ${theme.grass} rounded-[50%] border-t-[5px] ${theme.grassLine}`}></div>
+                                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-[45px] bg-[#d97706] opacity-[0.35]" style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)' }}></div>
+                            </div>
+                        </div>
+
+                        {/* NAMA SEKOLAH DI BAWAH */}
+                        <div className="absolute bottom-2 w-full text-center z-30">
+                            <p className="text-white text-[11px] font-black uppercase tracking-widest drop-shadow-md truncate px-4" style={{ WebkitTextStroke: '0.5px #0f172a' }}>
+                                {schName}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* MENU HOVER */}
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 flex flex-col gap-2 no-print">
+                        <button onClick={() => onRemove(index)} className="w-9 h-9 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Hapus Data">✕</button>
+                        <button onClick={handleDownloadPNG} className="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Download PNG">🖼️</button>
+                        <button onClick={handleDownloadPDF} className="w-9 h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Download PDF">📄</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // 4. MAIN APPLICATION
+        const App = () => {
+            const [students, setStudents] = useState(() => JSON.parse(localStorage.getItem('mpls_students')) || []);
+            const [schLogo, setSchLogo] = useState(() => localStorage.getItem('mpls_logo') || "https://via.placeholder.com/60?text=LOGO");
+            const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN CONTOH 01");
+            const [themeKey, setThemeKey] = useState(() => localStorage.getItem('mpls_theme') || "original");
+            
+            const [draftPhoto, setDraftPhoto] = useState("");
+            const [zipPhotos, setZipPhotos] = useState({});
+
+            const inNamaRef = useRef();
+            const inTtlRef = useRef();
+            const inFotoRef = useRef();
+
+            // Auto Save
+            useEffect(() => {
+                localStorage.setItem('mpls_students', JSON.stringify(students));
+                localStorage.setItem('mpls_logo', schLogo);
+                localStorage.setItem('mpls_schName', schName);
+                localStorage.setItem('mpls_theme', themeKey);
+            }, [students, schLogo, schName, themeKey]);
+
+            const upLogo = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const r = new FileReader();
+                    r.onload = (evt) => setSchLogo(evt.target.result);
+                    r.readAsDataURL(file);
+                }
+            };
+
+            const upFotoDraft = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const r = new FileReader();
+                    r.onload = (evt) => setDraftPhoto(evt.target.result);
+                    r.readAsDataURL(file);
+                }
+            };
+
+            const addManual = () => {
+                const nama = inNamaRef.current.value.toUpperCase().trim();
+                const ttl = inTtlRef.current.value.toUpperCase().trim();
+                if (!nama) return alert("Harap isi nama siswa!");
+                
+                setStudents([...students, { nama, ttl, foto: draftPhoto }]);
+                inNamaRef.current.value = "";
+                inTtlRef.current.value = "";
+                inFotoRef.current.value = "";
+                setDraftPhoto("");
+            };
+
+            const importZip = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const zip = await JSZip.loadAsync(file);
+                const newPhotos = { ...zipPhotos };
+                for (let name in zip.files) {
+                    if (!zip.files[name].dir) {
+                        const blob = await zip.files[name].async("blob");
+                        const b64 = await new Promise(res => {
+                            const r = new FileReader(); r.onloadend = () => res(r.result); r.readAsDataURL(blob);
+                        });
+                        const key = name.split('/').pop().split('.').shift().toUpperCase().trim();
+                        newPhotos[key] = b64;
+                    }
+                }
+                setZipPhotos(newPhotos);
+                setStudents(prev => prev.map(s => newPhotos[s.nama] ? { ...s, foto: newPhotos[s.nama] } : s));
+                alert("Foto ZIP berhasil di-extract dan dipasangkan!");
+            };
+
+            const importXl = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const r = new FileReader();
+                r.onload = (evt) => {
+                    const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+                    const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                    const newStudents = data.map(row => {
+                        const nama = (row.Nama || row.nama || "").toUpperCase().trim();
+                        return { nama, ttl: (row.TTL || row.ttl || row.Info || "").toUpperCase(), foto: zipPhotos[nama] || "" };
+                    });
+                    setStudents(newStudents);
+                };
+                r.readAsArrayBuffer(file);
+            };
+
+            const clearAllData = () => {
+                if (confirm("PERINGATAN: Menghapus semua data siswa secara permanen?")) {
+                    setStudents([]);
+                    localStorage.removeItem('mpls_students');
+                }
+            };
+
+            // Setup halaman cetak per 3 baris
+            const chunkedStudents = [];
+            for (let i = 0; i < students.length; i += 3) {
+                chunkedStudents.push({ items: students.slice(i, i + 3), startIndex: i });
+            }
+
+            return (
+                <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+                    {/* SIDEBAR */}
+                    <aside className="no-print w-full md:w-85 lg:w-96 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50">
+                        <div className="p-6 border-b border-slate-800">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
+                                <div>
+                                    <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto sidebar-scroll p-6 space-y-6">
+                            <section>
+                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">⚙️ Pilih Tema</label>
+                                <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none cursor-pointer">
+                                    <option value="original">Sky Blue (Sesuai Referensi)</option>
+                                    <option value="modern">Ocean Deep Blue</option>
+                                    <option value="energetic">Sunset Orange</option>
+                                    <option value="forest">Jungle Green</option>
+                                </select>
+                            </section>
+
+                            <section>
+                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">🏫 Profil Sekolah</label>
+                                <input type="text" value={schName} onChange={(e) => setSchName(e.target.value)} placeholder="Nama Sekolah..." className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none mb-3 uppercase" />
+                                
+                                <div className="flex items-center gap-3">
+                                    <label className="flex-1 flex flex-col items-center py-2 bg-slate-800 border border-dashed border-slate-600 rounded-lg cursor-pointer hover:bg-slate-700 transition">
+                                        <span className="text-[10px] font-bold">UPLOAD LOGO</span>
+                                        <input type="file" accept="image/*" className="hidden" onChange={upLogo} />
+                                    </label>
+                                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-slate-700 shrink-0">
+                                        <img src={schLogo} className="w-full h-full object-contain p-1" />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <hr className="border-slate-800" />
+
+                            <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
+                                <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
+                                <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                
+                                <div className="flex gap-2">
+                                    <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
+                                        <span className="text-[11px] font-bold">📸 Foto</span>
+                                        <input type="file" ref={inFotoRef} accept="image/*" className="hidden" onChange={upFotoDraft} />
+                                    </label>
+                                    <button onClick={addManual} className="flex-[2] bg-blue-600 hover:bg-blue-500 py-2 rounded-lg font-bold text-xs shadow-lg active:scale-95 transition">
+                                        ➕ TAMBAHKAN
+                                    </button>
+                                </div>
+                                {draftPhoto && <p className="text-[9px] text-emerald-400 text-center font-bold">✓ Foto terpilih siap ditambahkan</p>}
+                            </section>
+
+                            <section>
+                                <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">📂 Import Massal</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button onClick={() => document.getElementById('xlIn').click()} className="flex flex-col items-center gap-1 bg-emerald-900/40 border border-emerald-600/50 p-3 rounded-xl hover:bg-emerald-800/60 transition">
+                                        <span className="text-xl">📊</span><span className="text-[10px] font-bold">EXCEL</span>
+                                    </button>
+                                    <button onClick={() => document.getElementById('zipIn').click()} className="flex flex-col items-center gap-1 bg-indigo-900/40 border border-indigo-600/50 p-3 rounded-xl hover:bg-indigo-800/60 transition">
+                                        <span className="text-xl">📦</span><span className="text-[10px] font-bold">ZIP FOTO</span>
+                                    </button>
+                                    <input type="file" id="xlIn" className="hidden" accept=".xlsx, .xls" onChange={importXl} />
+                                    <input type="file" id="zipIn" className="hidden" accept=".zip" onChange={importZip} />
+                                </div>
+                            </section>
+                            
+                            <button onClick={clearAllData} className="w-full text-xs text-red-400 font-bold hover:text-red-300 transition mt-4 underline text-center">HAPUS SEMUA DATA PERMANEN</button>
+                        </div>
+
+                        <div className="p-6 bg-[#0f172a] border-t border-slate-800 shadow-2xl">
+                            <button onClick={() => window.print()} className="w-full bg-pink-600 hover:bg-pink-500 py-4 rounded-2xl font-black text-xl shadow-[0_6px_0_rgb(190,24,93)] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-3">
+                                🖨️ CETAK BATCH F4
+                            </button>
+                        </div>
+                    </aside>
+
+                    {/* PREVIEW AREA */}
+                    <main className="flex-1 p-4 md:p-10 overflow-y-auto bg-slate-200 w-full relative">
+                        <div className="no-print max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
+                            <div>
+                                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Realtime Preview F4</h2>
+                                <p className="text-[11px] text-slate-500 font-bold mt-1">Arahkan kursor ke kartu untuk melihat fitur Download individu (PNG/PDF).</p>
+                            </div>
+                            <div className="bg-slate-100 px-5 py-2 rounded-full shadow-inner text-xs font-bold text-slate-600 border border-slate-200">
+                                Total Siswa: <span className="text-pink-600 text-lg ml-1 font-black">{students.length}</span>
+                            </div>
+                        </div>
+
+                        <div id="printArea" className="flex flex-col items-center">
+                            {students.length === 0 ? (
+                                <div className="mt-20 text-slate-400 font-bold flex flex-col items-center gap-3">
+                                    <span className="text-5xl opacity-50">📭</span>
+                                    Belum ada data siswa yang diinput.
+                                </div>
+                            ) : (
+                                chunkedStudents.map((chunk, pageIndex) => (
+                                    <div key={pageIndex} className="hal-f4 bg-white md:shadow-xl md:border md:border-slate-300 md:mb-10 md:p-[10mm] flex flex-row justify-center items-center gap-[12mm] scale-[0.6] sm:scale-[0.8] md:scale-100 origin-top">
+                                        {chunk.items.map((student, idx) => (
+                                            <Card 
+                                                key={chunk.startIndex + idx} 
+                                                index={chunk.startIndex + idx} 
+                                                student={student} 
+                                                themeKey={themeKey} 
+                                                schName={schName} 
+                                                logo={schLogo} 
+                                                onRemove={(i) => {
+                                                    if(confirm(`Hapus data ${students[i].nama}?`)) {
+                                                        const newS = [...students];
+                                                        newS.splice(i, 1);
+                                                        setStudents(newS);
+                                                    }
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
