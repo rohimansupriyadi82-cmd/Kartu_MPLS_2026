@@ -191,7 +191,7 @@
                 <div className="relative group shrink-0">
                     <div id={cardId} className={`kartu-b3 w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
                         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-                            <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.15]" crossOrigin="anonymous" alt="Anak SD" />
+                            <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.1]" crossOrigin="anonymous" alt="Anak SD" />
                         </div>
                         
                         {/* ALAT TULIS TRANSPARAN */}
@@ -215,10 +215,10 @@
                         </div>
 
                         {/* TEKS MELENGKUNG: SELAMAT DATANG */}
-                        <div className="relative z-10 w-full h-[60px] mt-2">
+                        <div className="relative z-50 w-full h-[60px] mt-2">
                             <svg viewBox="0 0 300 60" className="w-full h-full drop-shadow-md">
                                 <path id={`curve-${index}`} d="M 55 50 Q 150 10 245 50" fill="transparent" />
-                                <text className="font-black text-[18px] tracking-widest uppercase" style={{ fill: '#f97316', stroke: 'white', strokeWidth: '4px', paintOrder: 'stroke' }}>
+                                <text className="font-black text-[18px] tracking-widest uppercase" style={{ fill: '#f97316', stroke: 'white', strokeWidth: '6px', paintOrder: 'stroke' }}>
                                     <textPath href={`#curve-${index}`} startOffset="50%" textAnchor="middle">SELAMAT DATANG</textPath>
                                 </text>
                             </svg>
@@ -300,6 +300,7 @@
             const [tempFoto, setTempFoto] = useState("");
             const [zipPhotos, setZipPhotos] = useState({});
             const quotaWarnedRef = useRef(false);
+            const [showGuide, setShowGuide] = useState(false);
 
             const inNamaRef = useRef();
             const inTtlRef = useRef();
@@ -337,7 +338,7 @@
                     r.onload = async (evt) => {
                         const raw = evt.target.result;
                         try {
-                            const compressed = await compressImageDataUrl(raw, { maxBytes: 150_000, maxWidth: 300, maxHeight: 300 });
+                            const compressed = await compressImageDataUrl(raw, { maxBytes: 180_000, maxWidth: 400, maxHeight: 400 });
                             setTempFoto(compressed);
                         } catch (err) {
                             setTempFoto(raw);
@@ -373,7 +374,7 @@
                         });
                         const key = name.split('/').pop().split('.').shift().toUpperCase().trim();
                         try {
-                            newPhotos[key] = await compressImageDataUrl(b64, { maxBytes: 150_000, maxWidth: 300, maxHeight: 300 });
+                            newPhotos[key] = await compressImageDataUrl(b64, { maxBytes: 180_000, maxWidth: 400, maxHeight: 400 });
                         } catch (err) {
                             newPhotos[key] = b64;
                         }
@@ -422,7 +423,7 @@
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
                                 <div>
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">Aplikasi Kartu MPLS</p>
                                 </div>
                             </div>
                         </div>
@@ -458,7 +459,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
@@ -485,6 +486,10 @@
                                     <input type="file" id="zipIn" className="hidden" accept=".zip" onChange={importZip} />
                                 </div>
                             </section>
+
+                            <button onClick={() => setShowGuide(true)} className="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-black text-xs shadow-lg transition flex items-center justify-center gap-2 border border-slate-700">
+                                📖 Panduan Pengguna
+                            </button>
                             
                             <button onClick={clearAllData} className="w-full text-xs text-red-400 font-bold hover:text-red-300 transition mt-4 underline text-center">HAPUS SEMUA DATA PERMANEN</button>
                         </div>
@@ -516,7 +521,7 @@
                                 </div>
                             ) : (
                                 pagedData.map((page, pageIndex) => (
-                                    <div key={pageIndex} className="page-break lembar-f4 hal-f4 bg-white md:shadow-xl md:border md:border-slate-300 md:mb-10 md:p-[10mm] flex flex-row justify-center items-center gap-[12mm] scale-[0.6] sm:scale-[0.8] md:scale-100 origin-top">
+                                    <div key={pageIndex} className="page-break lembar-f4 hal-f4 bg-white md:shadow-xl md:border md:border-slate-300 md:mb-10 md:p-[10mm] flex flex-row justify-center items-center gap-[2mm] scale-[0.6] sm:scale-[0.8] md:scale-100 origin-top">
                                         {page.items.map((student, idx) => (
                                             <Card 
                                                 key={page.startIndex + idx} 
@@ -539,6 +544,25 @@
                             )}
                         </div>
                     </main>
+
+                    {showGuide && (
+                        <div className="no-print fixed inset-0 z-[999] flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-black/60" onClick={() => setShowGuide(false)}></div>
+                            <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                                <div className="flex items-center justify-between px-5 py-4 bg-slate-50 border-b border-slate-200">
+                                    <h3 className="font-black text-slate-800">📖 Panduan Pengguna</h3>
+                                    <button onClick={() => setShowGuide(false)} className="w-9 h-9 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-black flex items-center justify-center">✕</button>
+                                </div>
+                                <div className="px-5 py-4 text-sm text-slate-700 space-y-3">
+                                    <div><span className="font-black">Langkah 1:</span> Isi Nama dan Info Siswa secara manual atau Import via Excel.</div>
+                                    <div><span className="font-black">Langkah 2:</span> Upload foto siswa (Sistem akan otomatis mengecilkan ukuran foto agar aplikasi lancar).</div>
+                                    <div><span className="font-black">Langkah 3:</span> Gunakan fitur Zip Foto jika ingin memasangkan foto secara massal berdasarkan nama.</div>
+                                    <div><span className="font-black">Langkah 4:</span> Cek preview. Kartu akan otomatis terbagi menjadi 3 kartu per halaman F4.</div>
+                                    <div><span className="font-black">Langkah 5:</span> Klik Cetak Batch dan pastikan setelan printer adalah Landscape dan ukuran kertas F4/Legal.</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
