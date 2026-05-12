@@ -26,8 +26,8 @@
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
         @keyframes float-kids {
-            0%, 100% { transform: translate(-50%, 0px); }
-            50% { transform: translate(-50%, -4px); }
+            0%, 100% { transform: translate(0, 0px); }
+            50% { transform: translate(0, -4px); }
         }
         .anim-kids { animation: float-kids 3s ease-in-out infinite; }
 
@@ -139,12 +139,12 @@
                         <div className="absolute z-[2] top-10 -right-8 w-32 h-16 bg-white rounded-full opacity-80 blur-[1px]"></div>
                         <div className="absolute z-[2] top-32 left-8 w-20 h-10 bg-white rounded-full opacity-70 blur-[1px]"></div>
 
-                        {/* LOGO SEKOLAH - Diperbaiki agar tidak menutupi teks */}
+                        {/* LOGO SEKOLAH */}
                         <div className="absolute top-3 left-3 z-20">
                             <img src={logo} className="w-11 h-11 rounded-full border-[2.5px] border-white bg-white shadow-md object-contain" crossOrigin="anonymous" />
                         </div>
 
-                        {/* TEKS MELENGKUNG: SELAMAT DATANG - Path diatur simetris untuk menghindari logo */}
+                        {/* TEKS MELENGKUNG: SELAMAT DATANG */}
                         <div className="relative z-10 w-full h-[60px] mt-2">
                             <svg viewBox="0 0 300 60" className="w-full h-full drop-shadow-md">
                                 <path id={`curve-${index}`} d="M 55 50 Q 150 10 245 50" fill="transparent" />
@@ -154,13 +154,13 @@
                             </svg>
                         </div>
 
-                        {/* JUDUL UTAMA MPLS & SUBTITLE */}
+                        {/* JUDUL UTAMA MPLS & SUBTITLE (SUDAH DIPERBAIKI: RATA TENGAH & SEIMBANG) */}
                         <div className="relative z-10 flex flex-col items-center mt-[-10px] w-full px-4">
                             <h1 className="text-[75px] leading-none font-black text-[#ec4899] drop-shadow-lg tracking-wide" style={{ WebkitTextStroke: '4px white', paintOrder: 'stroke' }}>
                                 MPLS
                             </h1>
-                            <div className={`${theme.subBg} border-2 border-white px-4 py-1 rounded-full shadow-md mt-1`}>
-                                <p className="text-white text-[10px] font-extrabold uppercase tracking-widest">
+                            <div className={`${theme.subBg} border-2 border-white px-5 py-1.5 rounded-full shadow-md mt-0 flex justify-center items-center`}>
+                                <p className="text-white text-[9px] font-black uppercase tracking-widest text-center">
                                     Masa Pengenalan Lingkungan Sekolah
                                 </p>
                             </div>
@@ -193,8 +193,9 @@
                         <div className="absolute bottom-0 left-0 w-full h-[160px] z-[5] pointer-events-none flex flex-col justify-end">
                             <SchoolBuilding />
                             
-                            <img src="https://png.pngtree.com/png-vector/20230817/ourmid/pngtree-indonesian-elementary-school-kids-boy-and-girl-with-red-white-uniform-vector-png-image_9185121.png"
-                                 className="absolute bottom-[20px] left-1/2 w-[70%] object-contain drop-shadow-md z-20 anim-kids" 
+                            {/* GAMBAR ANAK SD - DI POJOK KIRI BAWAH SESUAI REQUEST */}
+                            <img src="./Anak_SD.png"
+                                 className="absolute bottom-[22px] left-[10px] w-[50%] object-contain drop-shadow-lg z-20 anim-kids" 
                                  crossOrigin="anonymous" alt="Anak SD" />
 
                             <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
@@ -203,9 +204,12 @@
                             </div>
                         </div>
 
-                        {/* NAMA SEKOLAH DI BAWAH */}
-                        <div className="absolute bottom-2 w-full text-center z-30">
-                            <p className="text-white text-[11px] font-black uppercase tracking-widest drop-shadow-md truncate px-4" style={{ WebkitTextStroke: '0.5px #0f172a' }}>
+                        {/* NAMA SEKOLAH DI BAWAH (SUDAH DIPERBAIKI: JELAS & RAPI) */}
+                        <div className="absolute bottom-2 w-full text-center z-30 px-2">
+                            <p className="text-white text-[13px] font-black uppercase tracking-widest truncate" 
+                               style={{ 
+                                   textShadow: '2px 2px 0 #0f172a, -1px -1px 0 #0f172a, 1px -1px 0 #0f172a, -1px 1px 0 #0f172a, 0px 4px 5px rgba(0,0,0,0.8)' 
+                               }}>
                                 {schName}
                             </p>
                         </div>
@@ -225,7 +229,7 @@
         const App = () => {
             const [students, setStudents] = useState(() => JSON.parse(localStorage.getItem('mpls_students')) || []);
             const [schLogo, setSchLogo] = useState(() => localStorage.getItem('mpls_logo') || "https://via.placeholder.com/60?text=LOGO");
-            const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN CONTOH 01");
+            const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN MUARA BAKTI 01");
             const [themeKey, setThemeKey] = useState(() => localStorage.getItem('mpls_theme') || "original");
             
             const [draftPhoto, setDraftPhoto] = useState("");
