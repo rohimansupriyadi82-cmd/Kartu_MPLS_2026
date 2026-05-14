@@ -76,6 +76,30 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        const safeGetItem = (key) => {
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                return null;
+            }
+        };
+
+        const safeRemoveItem = (key) => {
+            try {
+                localStorage.removeItem(key);
+            } catch (e) {}
+        };
+
+        const safeJsonParse = (raw, fallback, keyForCleanup) => {
+            if (!raw) return fallback;
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                if (keyForCleanup) safeRemoveItem(keyForCleanup);
+                return fallback;
+            }
+        };
+
         const dataUrlBytes = (dataUrl) => {
             if (!dataUrl) return 0;
             const commaIndex = dataUrl.indexOf(',');
@@ -85,7 +109,7 @@
             return Math.ceil((b64.length * 3) / 4) - padding;
         };
 
-        const compressImageDataUrl = async (dataUrl, { maxBytes = 180_000, maxWidth = 720, maxHeight = 720 } = {}) => {
+        const compressImageDataUrl = async (dataUrl, { maxBytes = 180000, maxWidth = 720, maxHeight = 720 } = {}) => {
             if (!dataUrl) return "";
             const img = await new Promise((resolve, reject) => {
                 const i = new Image();
@@ -164,25 +188,6 @@
         const Card = ({ student, index, themeKey, schName, logo, onRemove, noPhoto }) => {
             const theme = THEMES[themeKey];
             const cardId = `card-${index}`;
-
-            const handleDownloadPNG = async () => {
-                const el = document.getElementById(cardId);
-                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
-                const link = document.createElement('a');
-                link.download = `MPLS_${student.nama}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            };
-
-            const handleDownloadPDF = async () => {
-                const el = document.getElementById(cardId);
-                const canvas = await html2canvas(el, { scale: 3, useCORS: true });
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', [85, 120]);
-                pdf.addImage(imgData, 'PNG', 0, 0, 85, 120);
-                pdf.save(`MPLS_${student.nama}.pdf`);
-            };
 
             return (
                 <div className="relative group shrink-0">
@@ -291,8 +296,6 @@
                     {/* MENU HOVER */}
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 flex flex-col gap-2 no-print">
                         <button onClick={() => onRemove(index)} className="w-9 h-9 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Hapus Data">✕</button>
-                        <button onClick={handleDownloadPNG} className="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Download PNG">🖼️</button>
-                        <button onClick={handleDownloadPDF} className="w-9 h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white text-sm" title="Download PDF">📄</button>
                     </div>
                 </div>
             );
@@ -301,12 +304,15 @@
         // MAIN APPLICATION
         const App = () => {
             const [students, setStudents] = useState(() => {
-                const stored = localStorage.getItem('mpls_students');
-                return stored ? JSON.parse(stored) : [];
+                const parsed = safeJsonParse(safeGetItem('mpls_students'), [], 'mpls_students');
+                return Array.isArray(parsed) ? parsed : [];
             });
-            const [schLogo, setSchLogo] = useState(() => localStorage.getItem('mpls_logo') || "https://via.placeholder.com/60?text=LOGO");
-            const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN MUARA BAKTI 01");
-            const [themeKey, setThemeKey] = useState(() => localStorage.getItem('mpls_theme') || "original");
+            const [schLogo, setSchLogo] = useState(() => safeGetItem('mpls_logo') || "https://via.placeholder.com/60?text=LOGO");
+            const [schName, setSchName] = useState(() => safeGetItem('mpls_schName') || "SDN MUARA BAKTI 01");
+            const [themeKey, setThemeKey] = useState(() => {
+                const saved = safeGetItem('mpls_theme') || "original";
+                return THEMES[saved] ? saved : "original";
+            });
             
             const [tempFoto, setTempFoto] = useState("");
             const [zipPhotos, setZipPhotos] = useState({});
@@ -351,7 +357,7 @@
                     r.onload = async (evt) => {
                         const raw = evt.target.result;
                         try {
-                            const compressed = await compressImageDataUrl(raw, { maxBytes: 180_000, maxWidth: 400, maxHeight: 400 });
+                            const compressed = await compressImageDataUrl(raw, { maxBytes: 180000, maxWidth: 400, maxHeight: 400 });
                             setTempFoto(compressed);
                         } catch (err) {
                             setTempFoto(raw);
@@ -387,7 +393,7 @@
                         });
                         const key = name.split('/').pop().split('.').shift().toUpperCase().trim();
                         try {
-                            newPhotos[key] = await compressImageDataUrl(b64, { maxBytes: 180_000, maxWidth: 400, maxHeight: 400 });
+                            newPhotos[key] = await compressImageDataUrl(b64, { maxBytes: 180000, maxWidth: 400, maxHeight: 400 });
                         } catch (err) {
                             newPhotos[key] = b64;
                         }
@@ -434,7 +440,7 @@
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
                                 <div>
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">Rohiman Supriyadi</p>
                                 </div>
                             </div>
                         </div>
@@ -588,8 +594,20 @@
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        const rootEl = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootEl);
+        const showFatal = (err) => {
+            try {
+                rootEl.innerHTML = '<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;max-width:720px;margin:24px auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;"><h2 style="margin:0 0 8px 0;color:#0f172a;">Aplikasi gagal berjalan</h2><div style="color:#334155;font-size:14px;line-height:1.4;">Biasanya ini terjadi karena data LocalStorage rusak/terlalu besar atau browser memblokir resource CDN. Coba: hapus data situs (LocalStorage) lalu refresh.</div></div>';
+            } catch (e) {}
+        };
+        window.addEventListener('unhandledrejection', (e) => showFatal(e && e.reason ? e.reason : e));
+        window.addEventListener('error', (e) => showFatal(e && e.error ? e.error : e));
+        try {
+            root.render(<App />);
+        } catch (e) {
+            showFatal(e);
+        }
     </script>
 </body>
 </html>
