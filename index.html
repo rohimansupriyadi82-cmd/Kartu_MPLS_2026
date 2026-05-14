@@ -136,7 +136,8 @@
             royal:    { sky: 'from-[#6366f1] to-[#c7d2fe]', grass: 'bg-[#38bdf8]', grassLine: 'border-[#0ea5e9]', nameBorder: 'border-[#4f46e5]', subBg: 'bg-[#4f46e5]', nameText: 'text-[#1e1b4b]' },
             cherry:   { sky: 'from-[#f43f5e] to-[#fecdd3]', grass: 'bg-[#fb7185]', grassLine: 'border-[#e11d48]', nameBorder: 'border-[#be123c]', subBg: 'bg-[#be123c]', nameText: 'text-[#881337]' },
             lavender: { sky: 'from-[#a78bfa] to-[#e9d5ff]', grass: 'bg-[#c4b5fd]', grassLine: 'border-[#8b5cf6]', nameBorder: 'border-[#7c3aed]', subBg: 'bg-[#7c3aed]', nameText: 'text-[#3b0764]' },
-            peach:    { sky: 'from-[#fdba74] to-[#ffe4e6]', grass: 'bg-[#86efac]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#fb923c]', subBg: 'bg-[#fb923c]', nameText: 'text-[#7c2d12]' }
+            peach:    { sky: 'from-[#fdba74] to-[#ffe4e6]', grass: 'bg-[#86efac]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#fb923c]', subBg: 'bg-[#fb923c]', nameText: 'text-[#7c2d12]' },
+            sunny:    { sky: 'from-[#facc15] to-[#fef9c3]', grass: 'bg-[#a3e635]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#ca8a04]', subBg: 'bg-[#ca8a04]', nameText: 'text-[#713f12]' }
         };
 
         const SchoolBuilding = () => (
@@ -433,7 +434,7 @@
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
                                 <div>
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">ROHIMAN KHAN</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">ROHIMAN KHANp>
                                 </div>
                             </div>
                         </div>
@@ -450,6 +451,7 @@
                                     <option value="cherry">Cherry Pink</option>
                                     <option value="lavender">Lavender Dream</option>
                                     <option value="peach">Peach Blossom</option>
+                                    <option value="sunny">Sunny Yellow</option>
                                 </select>
                                 
                                 <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-800 rounded-lg border border-slate-700 hover:bg-slate-700 transition">
@@ -478,7 +480,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
