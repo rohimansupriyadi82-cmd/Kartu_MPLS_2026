@@ -76,6 +76,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
+        // Utiliti untuk cek size dataURL
         const dataUrlBytes = (dataUrl) => {
             if (!dataUrl) return 0;
             const commaIndex = dataUrl.indexOf(',');
@@ -85,6 +86,7 @@
             return Math.ceil((b64.length * 3) / 4) - padding;
         };
 
+        // Utiliti Kompresi Gambar
         const compressImageDataUrl = async (dataUrl, { maxBytes = 180_000, maxWidth = 720, maxHeight = 720 } = {}) => {
             if (!dataUrl) return "";
 
@@ -137,7 +139,7 @@
             forest:   { sky: 'from-[#10b981] to-[#a7f3d0]', grass: 'bg-[#84cc16]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#4d7c0f]', subBg: 'bg-[#4d7c0f]', nameText: 'text-[#14532d]' }
         };
 
-        // 2. KOMPONEN SVG GEDUNG SEKOLAH (Flat Illustration)
+        // 2. KOMPONEN SVG GEDUNG SEKOLAH
         const SchoolBuilding = () => (
             <svg viewBox="0 0 200 120" className="absolute bottom-[35px] left-1/2 -translate-x-1/2 w-[85%] z-[5] drop-shadow-md">
                 <rect x="20" y="40" width="160" height="80" fill="#fef3c7" rx="4" />
@@ -164,7 +166,7 @@
         );
 
         // 3. KOMPONEN KARTU MPLS
-        const Card = ({ student, index, themeKey, schName, logo, onRemove }) => {
+        const Card = ({ student, index, themeKey, schName, logo, onRemove, noPhoto }) => {
             const theme = THEMES[themeKey];
             const cardId = `card-${index}`;
 
@@ -190,8 +192,9 @@
             return (
                 <div className="relative group shrink-0">
                     <div id={cardId} className={`kartu-b3 w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
+                        {/* Watermark Logo transparan di tengah */}
                         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-                            <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.1]" crossOrigin="anonymous" alt="Anak SD" />
+                            <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.1]" crossOrigin="anonymous" alt="Anak SD Background" />
                         </div>
                         
                         {/* ALAT TULIS TRANSPARAN */}
@@ -224,7 +227,7 @@
                             </svg>
                         </div>
 
-                        {/* JUDUL UTAMA MPLS & SUBTITLE (SUDAH DIPERBAIKI: RATA TENGAH & SEIMBANG) */}
+                        {/* JUDUL UTAMA MPLS & SUBTITLE */}
                         <div className="relative z-10 flex flex-col items-center mt-[-10px] w-full px-4">
                             <h1 className="text-[75px] leading-none font-black text-[#ec4899] drop-shadow-lg tracking-wide" style={{ WebkitTextStroke: '4px white', paintOrder: 'stroke' }}>
                                 MPLS
@@ -236,17 +239,8 @@
                             </div>
                         </div>
 
-                        {/* BINGKAI FOTO */}
-                        <div className="relative z-20 mt-4 w-[90px] h-[120px] rounded-2xl border-[4px] border-white shadow-xl overflow-hidden bg-white/70 flex justify-center items-center">
-                            {student.foto ? (
-                                <img src={student.foto} className="w-full h-full object-cover" crossOrigin="anonymous" />
-                            ) : (
-                                <span className="text-xs font-bold text-slate-400 text-center leading-tight">FOTO<br/>3x4</span>
-                            )}
-                        </div>
-
-                        {/* NAMA SISWA */}
-                        <div className="relative z-30 mt-3 w-[85%]">
+                        {/* PERBAIKAN: AREA NAMA DAN TTL (Dinaikan persisi dibawah judul mpls) */}
+                        <div className={`relative z-40 w-[85%] mt-3`}>
                             <div className={`bg-white rounded-[14px] shadow-lg border-b-[5px] ${theme.nameBorder} px-2 py-2.5 flex flex-col items-center justify-center min-h-[50px]`}>
                                 <h2 className={`${theme.nameText} font-black text-[17px] leading-tight uppercase text-center w-full truncate tracking-wide`}>
                                     {student.nama}
@@ -259,9 +253,25 @@
                             )}
                         </div>
 
+                        {/* BINGKAI FOTO (Sekarang beradaSequential setelah Nama/TTL) */}
+                        {!noPhoto && (
+                            <div className="relative z-30 mt-4 w-[90px] h-[120px] rounded-2xl border-[4px] border-white shadow-xl overflow-hidden bg-white/70 flex justify-center items-center overflow-hidden">
+                                {student.foto ? (
+                                    <img src={student.foto} className="w-full h-full object-cover" crossOrigin="anonymous" />
+                                ) : (
+                                    <span className="text-xs font-bold text-slate-400 text-center leading-tight">FOTO<br/>3x4</span>
+                                )}
+                            </div>
+                        )}
+
                         {/* AREA BAWAH: GEDUNG, ANAK SD, TAMAN */}
                         <div className="absolute bottom-0 left-0 w-full h-[160px] z-[5] pointer-events-none flex flex-col justify-end">
                             <SchoolBuilding />
+                            
+                            {/* PERBAIKAN: GAMBAR ANAK SD (Kecilkan sedikit agar tidak menumpuk/menghalangi) */}
+                            <img src="./Anak_SD.png"
+                                 className={`absolute bottom-[45px] left-[10px] ${noPhoto ? 'w-[48%]' : 'w-[38%]'} object-contain drop-shadow-lg z-20 anim-kids`}
+                                 crossOrigin="anonymous" alt="Anak SD" />
 
                             <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
                                 <div className={`absolute -top-[18px] left-0 w-full h-[35px] ${theme.grass} rounded-[50%] border-t-[5px] ${theme.grassLine}`}></div>
@@ -292,7 +302,10 @@
 
         // 4. MAIN APPLICATION
         const App = () => {
-            const [students, setStudents] = useState(() => JSON.parse(localStorage.getItem('mpls_students')) || []);
+            const [students, setStudents] = useState(() => {
+                const stored = localStorage.getItem('mpls_students');
+                return stored ? JSON.parse(stored) : [];
+            });
             const [schLogo, setSchLogo] = useState(() => localStorage.getItem('mpls_logo') || "https://via.placeholder.com/60?text=LOGO");
             const [schName, setSchName] = useState(() => localStorage.getItem('mpls_schName') || "SDN MUARA BAKTI 01");
             const [themeKey, setThemeKey] = useState(() => localStorage.getItem('mpls_theme') || "original");
@@ -301,12 +314,14 @@
             const [zipPhotos, setZipPhotos] = useState({});
             const quotaWarnedRef = useRef(false);
             const [showGuide, setShowGuide] = useState(false);
+            
+            const [noPhoto, setNoPhoto] = useState(false);
 
             const inNamaRef = useRef();
             const inTtlRef = useRef();
             const inFotoRef = useRef();
 
-            // Auto Save
+            // Auto Save & Quota Check
             useEffect(() => {
                 try {
                     localStorage.setItem('mpls_students', JSON.stringify(students));
@@ -316,7 +331,7 @@
                 } catch (e) {
                     if (!quotaWarnedRef.current) {
                         quotaWarnedRef.current = true;
-                        alert("Penyimpanan browser penuh. Foto akan dikompresi, atau kurangi jumlah data/foto agar tidak blank putih.");
+                        alert("Penyimpanan browser penuh. Foto akan dikompresi maksimal, atau kurangi jumlah data/foto agar tidak blank putih saat dibuka kembali.");
                     }
                 }
             }, [students, schLogo, schName, themeKey]);
@@ -358,7 +373,7 @@
                 setStudents(prevStudents => [...prevStudents, { nama, ttl, foto }]);
                 inNamaRef.current.value = "";
                 inTtlRef.current.value = "";
-                inFotoRef.current.value = "";
+                if(inFotoRef.current) inFotoRef.current.value = "";
             };
 
             const importZip = async (e) => {
@@ -408,7 +423,7 @@
                 }
             };
 
-            // Setup halaman cetak per 3 kartu
+            // Setup halaman cetak F4 (Legal) per 3 baris
             const pagedData = [];
             for (let i = 0; i < students.length; i += 3) {
                 pagedData.push({ items: students.slice(i, i + 3), startIndex: i });
@@ -416,14 +431,13 @@
 
             return (
                 <div className="app-shell flex flex-col md:flex-row h-screen overflow-hidden">
-                    {/* SIDEBAR */}
                     <aside className="no-print w-full md:w-85 lg:w-96 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50">
                         <div className="p-6 border-b border-slate-800">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
                                 <div>
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">Aplikasi Kartu MPLS</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
                                 </div>
                             </div>
                         </div>
@@ -431,12 +445,17 @@
                         <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
                             <section>
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">⚙️ Pilih Tema</label>
-                                <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none cursor-pointer">
+                                <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none cursor-pointer mb-3">
                                     <option value="original">Sky Blue (Sesuai Referensi)</option>
                                     <option value="modern">Ocean Deep Blue</option>
                                     <option value="energetic">Sunset Orange</option>
                                     <option value="forest">Jungle Green</option>
                                 </select>
+                                
+                                <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-800 rounded-lg border border-slate-700 hover:bg-slate-700 transition">
+                                    <input type="checkbox" checked={noPhoto} onChange={(e) => setNoPhoto(e.target.checked)} className="w-5 h-5 accent-pink-500" />
+                                    <span className="text-xs font-black text-slate-200 uppercase tracking-wider">Mode Tanpa Foto</span>
+                                </label>
                             </section>
 
                             <section>
@@ -459,7 +478,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
@@ -501,8 +520,7 @@
                         </div>
                     </aside>
 
-                    {/* PREVIEW AREA */}
-                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative">
+                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative preview-area">
                         <div className="no-print max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
                             <div>
                                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Realtime Preview F4</h2>
@@ -530,6 +548,7 @@
                                                 themeKey={themeKey} 
                                                 schName={schName} 
                                                 logo={schLogo} 
+                                                noPhoto={noPhoto}
                                                 onRemove={(i) => {
                                                     if(confirm(`Hapus data ${students[i].nama}?`)) {
                                                         const newS = [...students];
@@ -553,12 +572,19 @@
                                     <h3 className="font-black text-slate-800">📖 Panduan Pengguna</h3>
                                     <button onClick={() => setShowGuide(false)} className="w-9 h-9 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-black flex items-center justify-center">✕</button>
                                 </div>
-                                <div className="px-5 py-4 text-sm text-slate-700 space-y-3">
-                                    <div><span className="font-black">Langkah 1:</span> Isi Nama dan Info Siswa secara manual atau Import via Excel.</div>
-                                    <div><span className="font-black">Langkah 2:</span> Upload foto siswa (Sistem akan otomatis mengecilkan ukuran foto agar aplikasi lancar).</div>
-                                    <div><span className="font-black">Langkah 3:</span> Gunakan fitur Zip Foto jika ingin memasangkan foto secara massal berdasarkan nama.</div>
-                                    <div><span className="font-black">Langkah 4:</span> Cek preview. Kartu akan otomatis terbagi menjadi 3 kartu per halaman F4.</div>
-                                    <div><span className="font-black">Langkah 5:</span> Klik Cetak Batch dan pastikan setelan printer adalah Landscape dan ukuran kertas F4/Legal.</div>
+                                <div className="px-5 py-4 text-sm text-slate-700 hide-scrollbar overflow-y-auto max-h-[70vh]">
+                                    <div className="border-l-4 border-pink-500 pl-3 mb-4">
+                                        <h4 className="font-extrabold text-slate-900 mb-1">PENTING: Masalah Blank Putih saat Cetak</h4>
+                                        <p>Jika saat klik 'CETAK BATCH F4' tampilannya blank putih atau hang, itu karena browser kehabisan memori untuk memproses foto. </p>
+                                        <p className="font-bold mt-1 text-pink-600">Solusi: Hapus data, input kembali, lalu upload foto satu per satu. Sistem akan otomatis memperkecil ukuran foto agar lancar.</p>
+                                    </div>
+                                    <ol className="list-decimal list-inside space-y-2.5">
+                                        <li>Isi <span className="font-bold">Pofil Sekolah</span> (Nama & Logo).</li>
+                                        <li>Input siswa secara manual atau import via Excel.</li>
+                                        <li>Upload foto siswa satu per satu, atau upload file ZIP berisi foto dengan nama file sama dengan nama siswa.</li>
+                                        <li>Browser akan menyimpan data secara otomatis.</li>
+                                        <li>Gunakan tombol <span className="font-bold">Cetak Batch F4</span> di bawah sidebar untuk mencetak semua kartu sekaligus ke kertas Legal/F4 (Landscape).</li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
@@ -571,4 +597,4 @@
         root.render(<App />);
     </script>
 </body>
-</html>
+</html>```
