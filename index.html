@@ -241,6 +241,13 @@
                             )}
                         </div>
 
+                        {/* GAMBAR ANAK SD - POSISI TENGAH KHUSUS MODE TANPA FOTO */}
+                        {noPhoto && (
+                            <div className="relative z-20 mt-8 flex justify-center pointer-events-none">
+                                <img src="./Anak_SD.png" className="w-[46%] object-contain drop-shadow-lg anim-kids" crossOrigin="anonymous" alt="Anak SD" />
+                            </div>
+                        )}
+
                         {/* BINGKAI FOTO - MUNCUL JIKA NO-PHOTO MATI */}
                         {!noPhoto && (
                             <div className="relative z-30 mt-4 w-[90px] h-[120px] rounded-2xl border-[4px] border-white shadow-xl overflow-hidden bg-white/70 flex justify-center items-center overflow-hidden">
@@ -257,9 +264,11 @@
                             <SchoolBuilding />
                             
                             {/* GAMBAR ANAK SD - DIKECILKAN & DITURUNKAN */}
-                            <img src="./Anak_SD.png"
-                                 className={`absolute ${noPhoto ? 'bottom-[55px] left-1/2 -translate-x-1/2 w-[42%]' : 'bottom-[30px] left-[10px] w-[38%]'} object-contain drop-shadow-lg z-20 anim-kids`}
-                                 crossOrigin="anonymous" alt="Anak SD" />
+                            {!noPhoto && (
+                                <img src="./Anak_SD.png"
+                                     className="absolute bottom-[30px] left-[10px] w-[38%] object-contain drop-shadow-lg z-20 anim-kids"
+                                     crossOrigin="anonymous" alt="Anak SD" />
+                            )}
 
                             <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
                                 <div className={`absolute -top-[18px] left-0 w-full h-[35px] ${theme.grass} rounded-[50%] border-t-[5px] ${theme.grassLine}`}></div>
@@ -424,7 +433,7 @@
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
                                 <div>
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">Aplikasi Cetak Kartu MPLS</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
                                 </div>
                             </div>
                         </div>
