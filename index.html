@@ -76,7 +76,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // Utiliti untuk cek size dataURL
         const dataUrlBytes = (dataUrl) => {
             if (!dataUrl) return 0;
             const commaIndex = dataUrl.indexOf(',');
@@ -86,10 +85,8 @@
             return Math.ceil((b64.length * 3) / 4) - padding;
         };
 
-        // Utiliti Kompresi Gambar
         const compressImageDataUrl = async (dataUrl, { maxBytes = 180_000, maxWidth = 720, maxHeight = 720 } = {}) => {
             if (!dataUrl) return "";
-
             const img = await new Promise((resolve, reject) => {
                 const i = new Image();
                 i.onload = () => resolve(i);
@@ -131,41 +128,38 @@
             return out;
         };
 
-        // 1. PENGATURAN TEMA
         const THEMES = {
             original: { sky: 'from-[#38bdf8] to-[#bae6fd]', grass: 'bg-[#4ade80]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#3b82f6]', subBg: 'bg-[#3b82f6]', nameText: 'text-[#1e3a8a]' },
             modern:   { sky: 'from-[#3b82f6] to-[#93c5fd]', grass: 'bg-[#2dd4bf]', grassLine: 'border-[#0d9488]', nameBorder: 'border-[#0f766e]', subBg: 'bg-[#0f766e]', nameText: 'text-[#134e4a]' },
             energetic:{ sky: 'from-[#f97316] to-[#fde047]', grass: 'bg-[#fb923c]', grassLine: 'border-[#ea580c]', nameBorder: 'border-[#c2410c]', subBg: 'bg-[#ea580c]', nameText: 'text-[#7c2d12]' },
-            forest:   { sky: 'from-[#10b981] to-[#a7f3d0]', grass: 'bg-[#84cc16]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#4d7c0f]', subBg: 'bg-[#4d7c0f]', nameText: 'text-[#14532d]' }
+            forest:   { sky: 'from-[#10b981] to-[#a7f3d0]', grass: 'bg-[#84cc16]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#4d7c0f]', subBg: 'bg-[#4d7c0f]', nameText: 'text-[#14532d]' },
+            royal:    { sky: 'from-[#6366f1] to-[#c7d2fe]', grass: 'bg-[#38bdf8]', grassLine: 'border-[#0ea5e9]', nameBorder: 'border-[#4f46e5]', subBg: 'bg-[#4f46e5]', nameText: 'text-[#1e1b4b]' },
+            cherry:   { sky: 'from-[#f43f5e] to-[#fecdd3]', grass: 'bg-[#fb7185]', grassLine: 'border-[#e11d48]', nameBorder: 'border-[#be123c]', subBg: 'bg-[#be123c]', nameText: 'text-[#881337]' },
+            lavender: { sky: 'from-[#a78bfa] to-[#e9d5ff]', grass: 'bg-[#c4b5fd]', grassLine: 'border-[#8b5cf6]', nameBorder: 'border-[#7c3aed]', subBg: 'bg-[#7c3aed]', nameText: 'text-[#3b0764]' },
+            peach:    { sky: 'from-[#fdba74] to-[#ffe4e6]', grass: 'bg-[#86efac]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#fb923c]', subBg: 'bg-[#fb923c]', nameText: 'text-[#7c2d12]' }
         };
 
-        // 2. KOMPONEN SVG GEDUNG SEKOLAH
         const SchoolBuilding = () => (
             <svg viewBox="0 0 200 120" className="absolute bottom-[35px] left-1/2 -translate-x-1/2 w-[85%] z-[5] drop-shadow-md">
                 <rect x="20" y="40" width="160" height="80" fill="#fef3c7" rx="4" />
                 <rect x="20" y="75" width="160" height="5" fill="#f97316" />
                 <rect x="10" y="30" width="180" height="15" fill="#f97316" rx="2" />
-                
                 <rect x="80" y="40" width="40" height="80" fill="#ffedd5" />
                 <rect x="75" y="20" width="50" height="25" fill="#ea580c" />
                 <polygon points="100,5 70,20 130,20" fill="#c2410c" />
-                
                 <rect x="35" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="60" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="125" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="150" y="45" width="15" height="20" fill="#3b82f6" rx="2" />
-                
                 <rect x="35" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="60" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="125" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
                 <rect x="150" y="85" width="15" height="20" fill="#3b82f6" rx="2" />
-                
                 <rect x="85" y="90" width="30" height="30" fill="#94a3b8" />
                 <rect x="98" y="90" width="4" height="30" fill="#cbd5e1" />
             </svg>
         );
 
-        // 3. KOMPONEN KARTU MPLS DENGAN REVISI TATA LETAK
         const Card = ({ student, index, themeKey, schName, logo, onRemove, noPhoto }) => {
             const theme = THEMES[themeKey];
             const cardId = `card-${index}`;
@@ -192,12 +186,10 @@
             return (
                 <div className="relative group shrink-0">
                     <div id={cardId} className={`kartu-b3 w-[297px] h-[420px] bg-gradient-to-b ${theme.sky} relative overflow-hidden rounded-[16px] shadow-2xl border border-slate-300 font-nunito flex flex-col items-center kartu-print-border bg-white`}>
-                        {/* Watermark Logo transparan di tengah */}
                         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
                             <img src="./Anak_SD.png" className="w-[85%] h-[85%] object-contain opacity-[0.1]" crossOrigin="anonymous" alt="Anak SD Background" />
                         </div>
                         
-                        {/* ALAT TULIS TRANSPARAN */}
                         <div className="absolute inset-0 z-[1] opacity-[0.25] pointer-events-none text-2xl">
                             <span className="absolute top-10 left-5 -rotate-45">✏️</span>
                             <span className="absolute top-24 left-2 rotate-12">📏</span>
@@ -207,19 +199,14 @@
                             <span className="absolute top-[80px] right-[30%] -rotate-45">🍃</span>
                         </div>
 
-                        {/* AWAN */}
                         <div className="absolute z-[2] top-4 -left-6 w-24 h-12 bg-white rounded-full opacity-90 blur-[1px]"></div>
                         <div className="absolute z-[2] top-10 -right-8 w-32 h-16 bg-white rounded-full opacity-80 blur-[1px]"></div>
                         <div className="absolute z-[2] top-32 left-8 w-20 h-10 bg-white rounded-full opacity-70 blur-[1px]"></div>
 
-                        {/* LOGO SEKOLAH (Disembunyikan pada Mode Tanpa Foto agar tidak ganda) */}
-                        {!noPhoto && (
-                            <div className="absolute top-3 left-3 z-20">
-                                <img src={logo} className="w-11 h-11 rounded-full border-[2.5px] border-white bg-white shadow-md object-contain" crossOrigin="anonymous" />
-                            </div>
-                        )}
+                        <div className="absolute top-3 right-3 z-20">
+                            <img src={logo} className="w-11 h-11 rounded-full border-[2.5px] border-white bg-white shadow-md object-contain" crossOrigin="anonymous" />
+                        </div>
 
-                        {/* TEKS MELENGKUNG: SELAMAT DATANG */}
                         <div className="relative z-50 w-full h-[60px] mt-2">
                             <svg viewBox="0 0 300 60" className="w-full h-full drop-shadow-md">
                                 <path id={`curve-${index}`} d="M 55 50 Q 150 10 245 50" fill="transparent" />
@@ -229,7 +216,6 @@
                             </svg>
                         </div>
 
-                        {/* JUDUL UTAMA MPLS & SUBTITLE */}
                         <div className="relative z-10 flex flex-col items-center mt-[-10px] w-full px-4">
                             <h1 className="text-[75px] leading-none font-black text-[#ec4899] drop-shadow-lg tracking-wide" style={{ WebkitTextStroke: '4px white', paintOrder: 'stroke' }}>
                                 MPLS
@@ -241,7 +227,7 @@
                             </div>
                         </div>
 
-                        {/* PERBAIKAN: AREA NAMA DAN TTL (Dinaikan persisi dibawah judul mpls) */}
+                        {/* KOTAK NAMA & TTL - DINAIKKAN PERSIS DI BAWAH JUDUL */}
                         <div className={`relative z-40 w-[85%] mt-3`}>
                             <div className={`bg-white rounded-[14px] shadow-lg border-b-[5px] ${theme.nameBorder} px-2 py-2.5 flex flex-col items-center justify-center min-h-[50px]`}>
                                 <h2 className={`${theme.nameText} font-black text-[17px] leading-tight uppercase text-center w-full truncate tracking-wide`}>
@@ -255,7 +241,7 @@
                             )}
                         </div>
 
-                        {/* BINGKAI FOTO (Sekarang berada Sequential setelah Nama/TTL) */}
+                        {/* BINGKAI FOTO - MUNCUL JIKA NO-PHOTO MATI */}
                         {!noPhoto && (
                             <div className="relative z-30 mt-4 w-[90px] h-[120px] rounded-2xl border-[4px] border-white shadow-xl overflow-hidden bg-white/70 flex justify-center items-center overflow-hidden">
                                 {student.foto ? (
@@ -270,9 +256,9 @@
                         <div className="absolute bottom-0 left-0 w-full h-[160px] z-[5] pointer-events-none flex flex-col justify-end">
                             <SchoolBuilding />
                             
-                            {/* PERBAIKAN: GAMBAR ANAK SD (Kecilkan sedikit agar tidak menumpuk/menghalangi) */}
+                            {/* GAMBAR ANAK SD - DIKECILKAN & DITURUNKAN */}
                             <img src="./Anak_SD.png"
-                                 className={`absolute ${noPhoto ? 'bottom-[40px] left-[15%] w-[48%]' : 'bottom-[35px] left-[10px] w-[38%]'} object-contain drop-shadow-lg z-20 anim-kids`}
+                                 className={`absolute ${noPhoto ? 'bottom-[14px] left-[8px] w-[34%]' : 'bottom-[30px] left-[10px] w-[38%]'} object-contain drop-shadow-lg z-20 anim-kids`}
                                  crossOrigin="anonymous" alt="Anak SD" />
 
                             <div className={`w-full h-[45px] ${theme.grass} relative z-10 border-t-[5px] ${theme.grassLine}`}>
@@ -281,11 +267,8 @@
                             </div>
                         </div>
 
-                        {/* NAMA SEKOLAH DI BAWAH (REVISI: LOGO PADA MODE TANPA FOTO) */}
-                        <div className="absolute bottom-2 w-full z-30 px-2 flex items-center justify-center gap-2">
-                            {noPhoto && (
-                                <img src={logo} className="w-8 h-8 rounded-full border border-white bg-white shadow-sm object-contain" crossOrigin="anonymous" alt="Small Logo" />
-                            )}
+                        {/* NAMA SEKOLAH DI BAWAH */}
+                        <div className="absolute bottom-2 w-full text-center z-30 px-2">
                             <p className="text-white text-[13px] font-black uppercase tracking-widest truncate" 
                                style={{ 
                                    textShadow: '2px 2px 0 #0f172a, -1px -1px 0 #0f172a, 1px -1px 0 #0f172a, -1px 1px 0 #0f172a, 0px 4px 5px rgba(0,0,0,0.8)' 
@@ -305,7 +288,7 @@
             );
         };
 
-        // 4. MAIN APPLICATION
+        // MAIN APPLICATION
         const App = () => {
             const [students, setStudents] = useState(() => {
                 const stored = localStorage.getItem('mpls_students');
@@ -320,14 +303,13 @@
             const quotaWarnedRef = useRef(false);
             const [showGuide, setShowGuide] = useState(false);
             
-            // FITUR BARU: STATE NO PHOTO
             const [noPhoto, setNoPhoto] = useState(false);
 
             const inNamaRef = useRef();
             const inTtlRef = useRef();
             const inFotoRef = useRef();
 
-            // Auto Save
+            // Auto Save & Quota Check
             useEffect(() => {
                 try {
                     localStorage.setItem('mpls_students', JSON.stringify(students));
@@ -337,7 +319,7 @@
                 } catch (e) {
                     if (!quotaWarnedRef.current) {
                         quotaWarnedRef.current = true;
-                        alert("Penyimpanan browser penuh. Foto akan dikompresi, atau kurangi jumlah data/foto agar tidak blank putih.");
+                        alert("Penyimpanan browser penuh. Foto akan dikompresi maksimal.");
                     }
                 }
             }, [students, schLogo, schName, themeKey]);
@@ -379,7 +361,7 @@
                 setStudents(prevStudents => [...prevStudents, { nama, ttl, foto }]);
                 inNamaRef.current.value = "";
                 inTtlRef.current.value = "";
-                inFotoRef.current.value = "";
+                if(inFotoRef.current) inFotoRef.current.value = "";
             };
 
             const importZip = async (e) => {
@@ -403,7 +385,7 @@
                 }
                 setZipPhotos(newPhotos);
                 setStudents(prev => prev.map(s => newPhotos[s.nama] ? { ...s, foto: newPhotos[s.nama] } : s));
-                alert("Foto ZIP berhasil di-extract dan dipasangkan!");
+                alert("Foto ZIP berhasil dipasangkan!");
             };
 
             const importXl = (e) => {
@@ -429,7 +411,6 @@
                 }
             };
 
-            // Setup halaman cetak per 3 kartu
             const pagedData = [];
             for (let i = 0; i < students.length; i += 3) {
                 pagedData.push({ items: students.slice(i, i + 3), startIndex: i });
@@ -437,7 +418,6 @@
 
             return (
                 <div className="app-shell flex flex-col md:flex-row h-screen overflow-hidden">
-                    {/* SIDEBAR */}
                     <aside className="no-print w-full md:w-85 lg:w-96 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50">
                         <div className="p-6 border-b border-slate-800">
                             <div className="flex items-center gap-3">
@@ -457,9 +437,12 @@
                                     <option value="modern">Ocean Deep Blue</option>
                                     <option value="energetic">Sunset Orange</option>
                                     <option value="forest">Jungle Green</option>
+                                    <option value="royal">Royal Indigo</option>
+                                    <option value="cherry">Cherry Pink</option>
+                                    <option value="lavender">Lavender Dream</option>
+                                    <option value="peach">Peach Blossom</option>
                                 </select>
                                 
-                                {/* FITUR BARU: TOGGLE MODE TANPA FOTO */}
                                 <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-800 rounded-lg border border-slate-700 hover:bg-slate-700 transition">
                                     <input type="checkbox" checked={noPhoto} onChange={(e) => setNoPhoto(e.target.checked)} className="w-5 h-5 accent-pink-500" />
                                     <span className="text-xs font-black text-slate-200 uppercase tracking-wider">Mode Tanpa Foto</span>
@@ -528,8 +511,7 @@
                         </div>
                     </aside>
 
-                    {/* PREVIEW AREA */}
-                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative relative preview-area">
+                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative">
                         <div className="no-print max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
                             <div>
                                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Realtime Preview F4</h2>
@@ -599,4 +581,4 @@
         root.render(<App />);
     </script>
 </body>
-</html>```
+</html>
