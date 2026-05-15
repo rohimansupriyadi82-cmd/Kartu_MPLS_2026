@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kartu MPLS_2026</title>
+    <title>MPLS 2026 PRO - React & Tailwind Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -21,6 +21,8 @@
         html, body { height: 100%; margin: 0; overflow: hidden; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
         .font-nunito { font-family: 'Nunito', sans-serif; }
+        *, *::before, *::after { box-sizing: border-box; }
+        img, svg, canvas { max-width: 100%; }
         
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .hide-scrollbar::-webkit-scrollbar { width: 0; height: 0; }
@@ -52,7 +54,7 @@
             
             .lembar-f4 {
                 width: 330mm; height: 215mm;
-                display: flex; flex-direction: row;
+                display: flex !important; flex-direction: row !important;
                 justify-content: center; align-items: center;
                 gap: 2mm;
                 transform: none !important;
@@ -67,6 +69,18 @@
             .hal-f4 { gap: 2mm !important; }
             .lembar-f4:last-child, .hal-f4:last-child { break-after: auto; page-break-after: auto; }
             .kartu-print-border { border: 1px dashed #64748b !important; }
+        }
+
+        .app-shell { min-height: 0; height: 100dvh; }
+        @supports not (height: 100dvh) { .app-shell { height: 100vh; } }
+
+        @media (max-width: 767px) {
+            aside.no-print { max-height: 35dvh; transition: max-height 250ms ease; }
+            aside.no-print.sidebar-collapsed { max-height: 72px; }
+        }
+
+        @media (max-width: 640px) {
+            .lembar-f4 { flex-direction: column !important; gap: 16px !important; transform: none !important; }
         }
     </style>
 </head>
@@ -161,7 +175,9 @@
             cherry:   { sky: 'from-[#f43f5e] to-[#fecdd3]', grass: 'bg-[#fb7185]', grassLine: 'border-[#e11d48]', nameBorder: 'border-[#be123c]', subBg: 'bg-[#be123c]', nameText: 'text-[#881337]' },
             lavender: { sky: 'from-[#a78bfa] to-[#e9d5ff]', grass: 'bg-[#c4b5fd]', grassLine: 'border-[#8b5cf6]', nameBorder: 'border-[#7c3aed]', subBg: 'bg-[#7c3aed]', nameText: 'text-[#3b0764]' },
             peach:    { sky: 'from-[#fdba74] to-[#ffe4e6]', grass: 'bg-[#86efac]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#fb923c]', subBg: 'bg-[#fb923c]', nameText: 'text-[#7c2d12]' },
-            sunny:    { sky: 'from-[#facc15] to-[#fef9c3]', grass: 'bg-[#a3e635]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#ca8a04]', subBg: 'bg-[#ca8a04]', nameText: 'text-[#713f12]' }
+            sunny:    { sky: 'from-[#facc15] to-[#fef9c3]', grass: 'bg-[#a3e635]', grassLine: 'border-[#65a30d]', nameBorder: 'border-[#ca8a04]', subBg: 'bg-[#ca8a04]', nameText: 'text-[#713f12]' },
+            candyRed: { sky: 'from-[#ef4444] to-[#fecaca]', grass: 'bg-[#34d399]', grassLine: 'border-[#10b981]', nameBorder: 'border-[#dc2626]', subBg: 'bg-[#dc2626]', nameText: 'text-[#7f1d1d]' },
+            candyPink:{ sky: 'from-[#ec4899] to-[#fbcfe8]', grass: 'bg-[#86efac]', grassLine: 'border-[#22c55e]', nameBorder: 'border-[#db2777]', subBg: 'bg-[#db2777]', nameText: 'text-[#831843]' }
         };
 
         const SchoolBuilding = () => (
@@ -320,6 +336,7 @@
             const [showGuide, setShowGuide] = useState(false);
             
             const [noPhoto, setNoPhoto] = useState(false);
+            const [sidebarOpen, setSidebarOpen] = useState(true);
 
             const inNamaRef = useRef();
             const inTtlRef = useRef();
@@ -433,19 +450,19 @@
             }
 
             return (
-                <div className="app-shell flex flex-col md:flex-row h-screen overflow-hidden">
-                    <aside className="no-print w-full md:w-85 lg:w-96 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50">
-                        <div className="p-6 border-b border-slate-800">
-                            <div className="flex items-center gap-3">
+                <div className="app-shell flex flex-col md:flex-row h-[100dvh] md:h-screen overflow-hidden min-h-0">
+                    <aside className={`no-print w-full md:w-[320px] lg:w-[360px] bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-50 md:h-auto overflow-hidden min-h-0 ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+                        <div className="p-4 sm:p-6 border-b border-slate-800">
+                            <div className="flex items-center gap-3 min-w-0">
                                 <div className="p-2 bg-pink-500 rounded-lg"><span className="text-2xl">🎨</span></div>
-                                <div>
+                                <div className="min-w-0">
                                     <h1 className="font-black text-xl text-white">MPLS <span className="text-pink-400">2026</span></h1>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">Rohiman Supriyadi</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest leading-none">React Edition Engine</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
+                        <div className={`flex-1 min-h-0 overflow-y-auto hide-scrollbar p-4 sm:p-6 space-y-6 ${sidebarOpen ? "" : "hidden md:block"}`}>
                             <section>
                                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5 block">⚙️ Pilih Tema</label>
                                 <select value={themeKey} onChange={(e) => setThemeKey(e.target.value)} className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none cursor-pointer mb-3">
@@ -458,6 +475,8 @@
                                     <option value="lavender">Lavender Dream</option>
                                     <option value="peach">Peach Blossom</option>
                                     <option value="sunny">Sunny Yellow</option>
+                                    <option value="candyRed">Candy Red</option>
+                                    <option value="candyPink">Candy Pink</option>
                                 </select>
                                 
                                 <label className="flex items-center gap-3 cursor-pointer p-3 bg-slate-800 rounded-lg border border-slate-700 hover:bg-slate-700 transition">
@@ -486,7 +505,7 @@
                             <section className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 space-y-3">
                                 <label className="text-[11px] font-bold text-yellow-500 uppercase tracking-wider block">✍️ Input Siswa Baru</label>
                                 <input type="text" ref={inNamaRef} placeholder="Nama Lengkap" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
-                                <input type="text" ref={inTtlRef} placeholder="Kota, dd-mm-yyyy" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
+                                <input type="text" ref={inTtlRef} placeholder="Info (Misal: Gugus 1)" className="w-full bg-white text-black font-bold p-3 rounded-lg border-2 border-slate-700 outline-none" />
                                 
                                 <div className="flex gap-2">
                                     <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-700 transition border border-slate-700">
@@ -521,20 +540,20 @@
                             <button onClick={clearAllData} className="w-full text-xs text-red-400 font-bold hover:text-red-300 transition mt-4 underline text-center">HAPUS SEMUA DATA PERMANEN</button>
                         </div>
 
-                        <div className="p-6 bg-[#0f172a] border-t border-slate-800 shadow-2xl">
+                        <div className={`p-4 sm:p-6 bg-[#0f172a] border-t border-slate-800 shadow-2xl ${sidebarOpen ? "" : "hidden md:block"}`}>
                             <button onClick={() => window.print()} className="w-full bg-pink-600 hover:bg-pink-500 py-4 rounded-2xl font-black text-xl shadow-[0_6px_0_rgb(190,24,93)] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-3">
                                 🖨️ CETAK BATCH F4
                             </button>
                         </div>
                     </aside>
 
-                    <main className="flex-1 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative">
-                        <div className="no-print max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
+                    <main className="flex-1 min-h-0 p-4 md:p-10 overflow-y-auto hide-scrollbar bg-slate-200 w-full relative">
+                        <div className="no-print max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-300">
                             <div>
                                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Realtime Preview F4</h2>
                                 <p className="text-[11px] text-slate-500 font-bold mt-1">Arahkan kursor ke kartu untuk melihat fitur Download individu (PNG/PDF).</p>
                             </div>
-                            <div className="bg-slate-100 px-5 py-2 rounded-full shadow-inner text-xs font-bold text-slate-600 border border-slate-200">
+                            <div className="bg-slate-100 px-5 py-2 rounded-full shadow-inner text-xs font-bold text-slate-600 border border-slate-200 w-fit">
                                 Total Siswa: <span className="text-pink-600 text-lg ml-1 font-black">{students.length}</span>
                             </div>
                         </div>
@@ -571,6 +590,17 @@
                             )}
                         </div>
                     </main>
+
+                    <div className="no-print md:hidden fixed right-4 z-[1000]" style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(v => !v)}
+                            className="w-14 h-14 rounded-full bg-pink-600 hover:bg-pink-500 text-white shadow-2xl border-4 border-white font-black flex items-center justify-center active:scale-95 transition"
+                            title={sidebarOpen ? "Tutup Menu" : "Buka Menu"}
+                        >
+                            {sidebarOpen ? "✕" : "☰"}
+                        </button>
+                    </div>
 
                     {showGuide && (
                         <div className="no-print fixed inset-0 z-[999] flex items-center justify-center p-4">
